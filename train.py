@@ -9,8 +9,8 @@ import data_engine
 
 VGG_MEAN = [103.939, 116.779, 123.68]
 
-image_height = 720
-image_width = 960
+image_height = 256
+image_width = 256
 feature_height = int(np.ceil(image_height / 16.))
 feature_width = int(np.ceil(image_width / 16.))
 
@@ -22,7 +22,7 @@ class RPN:
             path = os.path.abspath(os.path.join(path, os.pardir))
             path = os.path.join(path, 'vgg16.npy')
             vgg16_npy_path = path
-            print path
+            print(path)
 
         self.data_dict = np.load(vgg16_npy_path, encoding='latin1').item()
         print('npy file loaded')
@@ -199,7 +199,7 @@ def checkFile(fileName):
     if os.path.isfile(fileName):
         return True
     else:
-        print fileName, 'is not found!'
+        print(fileName, 'is not found!')
         exit()
 
 
@@ -212,13 +212,13 @@ def checkDir(fileName, creat=False):
         if creat:
             os.mkdir(fileName)
         else:
-            print fileName, 'is not found!'
+            print(fileName, 'is not found!')
             exit()
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print 'please input GPU index'
+        print('please input GPU index')
         exit()
 
     gpuNow = '/gpu:'+sys.argv[1]
@@ -230,14 +230,14 @@ if __name__ == '__main__':
     modelSaveDir = './models/'
     vggModelPath = './models/vgg16.npy'
 
-    imageLoadDir = './yourImagePath/'
-    anoLoadDir = './yourAnnotationPath/'
+    imageLoadDir = './datasets/kaist/trainB'
+    anoLoadDir = './datasets/kaist/trainB_ann'
 
     checkDir(modelSaveDir, False)
     checkDir(imageLoadDir, False)
     checkDir(anoLoadDir, False)
 
-    with tf.device(gpuNow):
+    with tf.device('/cpu:0'):
         sess = tf.Session() 
         image = tf.placeholder(tf.float32, [1, image_height, image_width, 3])
         label = tf.placeholder(tf.float32, [None, 2])
@@ -252,11 +252,11 @@ if __name__ == '__main__':
 
         sess.run(tf.initialize_all_variables())
         for var in tf.trainable_variables():
-            print var.name, var.get_shape().as_list(), sess.run(tf.nn.l2_loss(var))
+            print(var.name, var.get_shape().as_list(), sess.run(tf.nn.l2_loss(var)))
 
         
         cnnData = data_engine.CNNData(batch_size, imageLoadDir, anoLoadDir)
-        print 'Training Begin'
+        print('Training Begin')
     
         train_loss = []
         train_cross_entropy = []
@@ -282,8 +282,8 @@ if __name__ == '__main__':
 
             if i % print_time == 0:
               
-                print ' step :', i, 'time :', time.time() - start_time, 'loss :', np.mean(
-                    train_loss), 'l_r :', l_r
+                print(' step :', i, 'time :', time.time() - start_time, 'loss :', np.mean(
+                    train_loss), 'l_r :', l_r)
                 train_loss = []
 
             if i% saveTime == 0:

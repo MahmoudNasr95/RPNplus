@@ -23,8 +23,8 @@ def getAllFiles(dirName, houzhui):
 class RPN_Test(object):
     def __init__(self):
 
-        self.image_height = 720
-        self.image_width = 960
+        self.image_height = 256
+        self.image_width = 256
 
         self.convmap_height = int(np.ceil(self.image_height / 16.))
         self.convmap_width = int(np.ceil(self.image_width / 16.))
@@ -88,8 +88,8 @@ class RPN_Test(object):
 class My_Caltech_Test(object):
     def __init__(self ,original):
         self.original = original;
-        self.image_height = 720
-        self.image_width = 960
+        self.image_height = 256
+        self.image_width = 256
 
         self.convmap_height = int(np.ceil(self.image_height / 16.))
         self.convmap_width = int(np.ceil(self.image_width / 16.))
@@ -191,8 +191,8 @@ class CNNData(object):
 
         self.aspect_ratio = 0.41
         self.image_resize_factor = 1.5
-        self.image_height = 720
-        self.image_width = 960
+        self.image_height = 256
+        self.image_width = 256
 
         self.convmap_height = int(np.ceil(self.image_height / 16.))
         self.convmap_width = int(np.ceil(self.image_width / 16.))
@@ -218,6 +218,7 @@ class CNNData(object):
         self.imdb_train = self.load_image()
         self.imdb_train = self.proposal_prepare(self.imdb_train)
         print ('Done')
+	# self.generate_minibatch() is empty
 
         self.inds = self.generate_minibatch()
         print ('Total Batches:', self.inds.shape[0])
@@ -421,6 +422,7 @@ class CNNData(object):
         n = len(imdb)
         foreground_anchor_size = np.zeros(n)
         for i in range(n):
+            #computer_target returns a matrix of all zeros except column 0
             imdb[i]['roi_anchor'], foreground_anchor_size[i] = compute_target(imdb[i]['roi'], proposals, self.fg_thresh,
                                                                               self.bg_thresh)
             imdb[i]['fgsize']= foreground_anchor_size[i]
@@ -432,6 +434,7 @@ class CNNData(object):
         return imdb
 
     def generate_minibatch(self):
+	# self.fg_anchors_per_image are all 0s
         keep = np.where(self.fg_anchors_per_image >= 10)[0]
         np.random.shuffle(keep)
         return keep
@@ -453,12 +456,14 @@ def compute_target(roi_t, proposals, fg_thresh, bg_thresh):
     for i in range(proposal_size):
         if overlap_max[i] >= fg_thresh:
             if roi[overlap_max_idx[i], 4] == 0:
+                # print(i)
                 roi_anchor[i, 0] = 1
                 roi_anchor[i, 1:5] = compute_regression(roi[overlap_max_idx[i], :4], proposals[i, :])
         if overlap_max[i] <= bg_thresh:
             roi_anchor[i, 0] = -1
 
     foreground = np.sum(roi_anchor[:, 0] == 1)
+    print(foreground)
     return roi_anchor, foreground
 
 def compute_overlap(mat1, mat2):
