@@ -1,2 +1,5 @@
 # ignore the following folders and files
 datasets/
+results/
+__pycache__/
+models/

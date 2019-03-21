@@ -10,6 +10,11 @@ wandhG = [[100.0, 100.0], [300.0, 300.0], [500.0, 500.0],
           [200.0, 100.0], [370.0, 185.0], [440.0, 220.0],
           [100.0, 200.0], [185.0, 370.0], [220.0, 440.0]]
 
+# height = 720
+# width = 960
+height = 256
+width = 256
+
 def getAllFiles(dirName, houzhui):
     results = []
 
@@ -23,8 +28,8 @@ def getAllFiles(dirName, houzhui):
 class RPN_Test(object):
     def __init__(self):
 
-        self.image_height = 256
-        self.image_width = 256
+        self.image_height = height
+        self.image_width = width
 
         self.convmap_height = int(np.ceil(self.image_height / 16.))
         self.convmap_width = int(np.ceil(self.image_width / 16.))
@@ -88,8 +93,8 @@ class RPN_Test(object):
 class My_Caltech_Test(object):
     def __init__(self ,original):
         self.original = original;
-        self.image_height = 256
-        self.image_width = 256
+        self.image_height = height
+        self.image_width = width
 
         self.convmap_height = int(np.ceil(self.image_height / 16.))
         self.convmap_width = int(np.ceil(self.image_width / 16.))
@@ -191,8 +196,8 @@ class CNNData(object):
 
         self.aspect_ratio = 0.41
         self.image_resize_factor = 1.5
-        self.image_height = 256
-        self.image_width = 256
+        self.image_height = height
+        self.image_width = width
 
         self.convmap_height = int(np.ceil(self.image_height / 16.))
         self.convmap_width = int(np.ceil(self.image_width / 16.))

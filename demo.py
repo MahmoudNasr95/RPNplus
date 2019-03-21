@@ -196,8 +196,8 @@ if __name__ == '__main__':
     checkFile(modelPath)
 
 
-    image_height = 720
-    image_width = 960
+    height = image_height
+    width = image_width
 
     testDeal = data_engine.RPN_Test()
 
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
     
     sess = tf.Session()  
-    image = tf.placeholder(tf.float32, [1, image_height, image_width, 3])
+    image = tf.placeholder(tf.float32, [1, height, width, 3])
 
     cnn = RPN(vggModelPath, modelPath)
     with tf.name_scope('content_rpn'):
@@ -218,7 +218,7 @@ if __name__ == '__main__':
     for imageName in imageNames:
         print (imageName[0])
         im = Image.open(imageName[0])
-        pix = np.array(im.getdata()).reshape(1, image_height, image_width, 3).astype(np.float32)
+        pix = np.array(im.getdata()).reshape(1, height, width, 3).astype(np.float32)
         
         start_ = datetime.utcnow()  
         [test_prob, test_bbox_pred] = sess.run([cnn.prob, cnn.bbox_pred], feed_dict={image: pix})
@@ -228,6 +228,7 @@ if __name__ == '__main__':
         print ('%s uses %d milliseconds' % (imageName[0] , c.microseconds/1000  ) )
 
         bbox = testDeal.rpn_nms(test_prob, test_bbox_pred)
+        print("here are the bbox:\n"+str(len(bbox)))
         imglib.read_img(imageName[0])
         imglib.setBBXs(bbox, 'person')
         imglib.drawBox(0.99)
