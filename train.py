@@ -9,6 +9,7 @@ import data_engine
 
 VGG_MEAN = [103.939, 116.779, 123.68]
 
+# The only place in this file that the size has to change
 image_height = 256
 image_width = 256
 feature_height = int(np.ceil(image_height / 16.))
@@ -230,8 +231,9 @@ if __name__ == '__main__':
     modelSaveDir = './models/'
     vggModelPath = './models/vgg16.npy'
 
-    imageLoadDir = './datasets/kaist/trainB'
-    anoLoadDir = './datasets/kaist/trainB_ann'
+    # changed to smaller directory so I can check
+    imageLoadDir = './datasets/kaist/train'
+    anoLoadDir = './datasets/kaist/ann'
 
     checkDir(modelSaveDir, False)
     checkDir(imageLoadDir, False)
@@ -263,7 +265,8 @@ if __name__ == '__main__':
         train_bbox_loss = []
         start_time = time.time()
 
-        for i in xrange(1, step + 1):
+        # xrange vs range?
+        for i in range(1, step + 1):
             batch = cnnData.prepare_data()
             if i <= 7000:
                 l_r = 0.001

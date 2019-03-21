@@ -12,6 +12,7 @@ wandhG = [[100.0, 100.0], [300.0, 300.0], [500.0, 500.0],
 
 # height = 720
 # width = 960
+# The only place in this file that the size has to change
 height = 256
 width = 256
 
@@ -221,9 +222,11 @@ class CNNData(object):
         print ('Load Training Data')
 
         self.imdb_train = self.load_image()
+        print(self.imdb_train[3])
         self.imdb_train = self.proposal_prepare(self.imdb_train)
+        print(self.imdb_train[3])
         print ('Done')
-	# self.generate_minibatch() is empty
+        # self.generate_minibatch() is empty
 
         self.inds = self.generate_minibatch()
         print ('Total Batches:', self.inds.shape[0])
@@ -241,6 +244,7 @@ class CNNData(object):
             self.inds = self.generate_minibatch()
             self.idx = 0
 
+        print(self.inds.shape)
         ind = self.inds[self.idx]
         im_train = self.imdb_train[ind]
         self.idx += 1
@@ -340,7 +344,12 @@ class CNNData(object):
                     imdb.append(iminfo)
         else:
             self.files = getAllFiles(self.imageLoadDir, '.jpg')
+            # print("here is the list of all images:")
+            # print("\t" +str(self.files))
+            # print(" - - - - - - - - - - - - - - - - - - - - - -  - -")
             for fileNow in self.files:
+                # print("is this name even valid?" +str(fileNow))
+                # print(self.anoLoadDir + '/' + fileNow[1] + '.txt')
                 roi = self.load_roi(self.anoLoadDir + '/' + fileNow[1] + '.txt')
                 iminfo = {'name': fileNow[0], 'image': None, 'roi': roi}
                 imdb.append(iminfo)
@@ -354,9 +363,12 @@ class CNNData(object):
     def load_roi(self, path):
         f = open(path)
         bbs = f.readlines()[1:]
+        # print(bbs)
+        # ['person 159 212 34 64 0 0 0 0 0 0 0\n', 'person 137 211 38 70 0 0 0 0 0 0 0\n', 'people 580 196 24 91 0 0 0 0 0 0 0\n']
         roi = np.zeros([len(bbs), 5])
         for iter_, bb in zip(range(len(bbs)), bbs):
             bb = bb.replace('\n', '').split(' ')
+            # ['person', '387', '220', '51', '101', '1', '0', '0', '0', '0', '0', '0']
             bbtype = bb[0]
             bba = np.array([float(bb[i]) for i in range(1, 5)])
             occ = float(bb[5])
@@ -364,9 +376,8 @@ class CNNData(object):
             ignore = int(bb[10])
 
             ignore = ignore or (bbtype != 'person')
-            ignore = ignore or (bba[3] < 40)
-
-           
+            # ignore = ignore or (bba[3] < 40) changed it to be 20 because our people are tiny
+            ignore = ignore or (bba[3] < 20)
 
             roi[iter_, :4] = bba
             roi[iter_, 4] = ignore
@@ -402,6 +413,7 @@ class CNNData(object):
     def proposal_prepare(self, imdb):
       
         anchors = self.generate_anchors()
+        print(anchors)
         proposals = np.zeros([self.anchor_size * self.convmap_width * self.convmap_height, 4])
 
         for i in range(self.convmap_height):
@@ -428,8 +440,7 @@ class CNNData(object):
         foreground_anchor_size = np.zeros(n)
         for i in range(n):
             #computer_target returns a matrix of all zeros except column 0
-            imdb[i]['roi_anchor'], foreground_anchor_size[i] = compute_target(imdb[i]['roi'], proposals, self.fg_thresh,
-                                                                              self.bg_thresh)
+            imdb[i]['roi_anchor'], foreground_anchor_size[i] = compute_target(imdb[i]['roi'], proposals, self.fg_thresh,self.bg_thresh)
             imdb[i]['fgsize']= foreground_anchor_size[i]
             if i % 500 == 0:
                 print('Compute Target: %d/%d' % (i, n))
@@ -439,7 +450,7 @@ class CNNData(object):
         return imdb
 
     def generate_minibatch(self):
-	# self.fg_anchors_per_image are all 0s
+        # self.fg_anchors_per_image are all 0s
         keep = np.where(self.fg_anchors_per_image >= 10)[0]
         np.random.shuffle(keep)
         return keep
@@ -468,7 +479,7 @@ def compute_target(roi_t, proposals, fg_thresh, bg_thresh):
             roi_anchor[i, 0] = -1
 
     foreground = np.sum(roi_anchor[:, 0] == 1)
-    print(foreground)
+    # print(foreground)
     return roi_anchor, foreground
 
 def compute_overlap(mat1, mat2):
